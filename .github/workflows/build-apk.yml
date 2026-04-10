@@ -18,13 +18,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Remover Gradle do sistema
+        run: |
+          sudo rm -rf /usr/share/gradle* /usr/bin/gradle /usr/local/bin/gradle 2>/dev/null || true
+          wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
+          unzip -q gradle-8.2-bin.zip -d $HOME/gradle
+          sudo ln -sf $HOME/gradle/gradle-8.2/bin/gradle /usr/local/bin/gradle
+          gradle --version
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Instalar SDK
+        run: sdkmanager "platforms;android-33" "build-tools;33.0.2" "platform-tools"
+
       - name: Criar projeto Android
         run: |
           mkdir -p android/app/src/main/java/com/blockforge/engine
           mkdir -p android/app/src/main/assets/www
           mkdir -p android/app/src/main/res/xml
           mkdir -p android/app/src/main/res/values
-          mkdir -p android/gradle/wrapper
 
           cp www/index.html android/app/src/main/assets/www/index.html
 
@@ -54,7 +67,6 @@ jobs:
                   s.setAllowFileAccessFromFileURLs(true);
                   s.setAllowUniversalAccessFromFileURLs(true);
                   s.setMediaPlaybackRequiresUserGesture(false);
-                  s.setCacheMode(WebSettings.LOAD_DEFAULT);
                   webView.setWebViewClient(new WebViewClient());
                   webView.setWebChromeClient(new WebChromeClient());
                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -104,9 +116,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <network-security-config>
               <base-config cleartextTrafficPermitted="true">
-                  <trust-anchors>
-                      <certificates src="system" />
-                  </trust-anchors>
+                  <trust-anchors><certificates src="system" /></trust-anchors>
               </base-config>
           </network-security-config>
           XML
@@ -134,16 +144,20 @@ jobs:
               buildTypes {
                   debug { minifyEnabled false }
               }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
           }
           dependencies {
-              implementation 'androidx.appcompat:appcompat:1.4.0'
+              implementation 'androidx.appcompat:appcompat:1.6.1'
           }
           GRADLE
 
           cat > android/build.gradle << 'GRADLE'
           buildscript {
               repositories { google(); mavenCentral() }
-              dependencies { classpath 'com.android.tools.build:gradle:7.2.2' }
+              dependencies { classpath 'com.android.tools.build:gradle:8.1.4' }
           }
           allprojects {
               repositories { google(); mavenCentral() }
@@ -155,28 +169,14 @@ jobs:
           include ':app'
           GRADLE
 
-          cat > android/gradle/wrapper/gradle-wrapper.properties << 'PROPS'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-bin.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          PROPS
-
           cd android
-          gradle wrapper --gradle-version=7.5
+          gradle wrapper --gradle-version=8.2 --distribution-type=bin
           chmod +x gradlew
-
-      - name: Android SDK
-        uses: android-actions/setup-android@v2
-
-      - name: Instalar SDK
-        run: sdkmanager "platforms;android-33" "build-tools;33.0.2" "platform-tools"
 
       - name: Compilar APK
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Baixar APK
         uses: actions/upload-artifact@v4
