@@ -34,9 +34,9 @@ jobs:
       - name: Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Instalar SDK 33
+      - name: Instalar SDK
         run: |
-          sdkmanager "platforms;android-33" "build-tools;33.0.2" "platform-tools"
+          sdkmanager "platforms;android-33" "build-tools;33.0.2" "build-tools;32.0.0" "platform-tools"
 
       - name: Instalar Cordova
         run: npm install -g cordova@11
