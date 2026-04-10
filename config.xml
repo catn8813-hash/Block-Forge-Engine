@@ -15,7 +15,7 @@
 
   <preference name="AndroidRequestLegacyExternalStorage" value="true" />
   <preference name="android-minSdkVersion" value="22" />
-  <preference name="android-targetSdkVersion" value="32" />
+  <preference name="android-targetSdkVersion" value="33" />
   <preference name="Fullscreen" value="false" />
   <preference name="DisallowOverscroll" value="true" />
   <preference name="AllowInlineMediaPlayback" value="true" />
