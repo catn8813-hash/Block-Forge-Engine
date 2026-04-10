@@ -1,0 +1,9 @@
+{
+  "name": "blockforge-engine",
+  "version": "1.9.0",
+  "description": "BlockForge 2D Game Engine",
+  "scripts": {
+    "build": "cordova build android --debug"
+  },
+  "dependencies": {}
+}
