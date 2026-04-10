@@ -12,16 +12,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Java 11
+      - name: Java 17
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
+      - name: Substituir Gradle do sistema por 7.6.4
+        run: |
+          sudo rm -rf /usr/share/gradle* /usr/bin/gradle /usr/local/bin/gradle 2>/dev/null || true
+          wget -q https://services.gradle.org/distributions/gradle-7.6.4-bin.zip
+          unzip -q gradle-7.6.4-bin.zip -d $HOME/gradle
+          sudo ln -sf $HOME/gradle/gradle-7.6.4/bin/gradle /usr/local/bin/gradle
+          gradle --version
 
       - name: Android SDK
         uses: android-actions/setup-android@v2
