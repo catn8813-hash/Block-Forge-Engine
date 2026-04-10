@@ -23,9 +23,17 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Instalar Gradle 8.7
+        run: |
+          sudo apt-get remove -y gradle 2>/dev/null || true
+          wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q gradle-8.7-bin.zip -d $HOME/gradle
+          echo "$HOME/gradle/gradle-8.7/bin" >> $GITHUB_PATH
+          export PATH="$HOME/gradle/gradle-8.7/bin:$PATH"
+          gradle --version
+
       - name: Configurar Android SDK
         run: |
-          sudo apt-get install -y wget unzip
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
           mkdir -p $HOME/android-sdk/cmdline-tools
           unzip -q commandlinetools-linux-11076708_latest.zip -d $HOME/android-sdk/cmdline-tools
@@ -35,7 +43,7 @@ jobs:
           echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
           echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
 
-      - name: Aceitar licenças e instalar SDK
+      - name: Instalar SDK Android
         run: |
           yes | sdkmanager --sdk_root=$HOME/android-sdk --licenses || true
           sdkmanager --sdk_root=$HOME/android-sdk "platforms;android-33" "build-tools;33.0.2" "platform-tools"
@@ -46,7 +54,7 @@ jobs:
       - name: Adicionar plataforma Android
         run: |
           export ANDROID_HOME=$HOME/android-sdk
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export PATH="$HOME/gradle/gradle-8.7/bin:$PATH"
           cordova platform add android@12
 
       - name: Instalar Plugins
@@ -60,7 +68,7 @@ jobs:
       - name: Compilar APK
         run: |
           export ANDROID_HOME=$HOME/android-sdk
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export PATH="$HOME/gradle/gradle-8.7/bin:$PATH"
           cordova build android --debug
 
       - name: Baixar APK
